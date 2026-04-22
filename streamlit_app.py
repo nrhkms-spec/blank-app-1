@@ -1,33 +1,29 @@
 
 import streamlit as st
-from openai import OpenAI
+import google.generativeai as genai
 
-# BAŞLIK VE GÖRSEL
+# Sayfa Ayarları
+st.set_page_config(page_title="Mistik Mesaj", page_icon="🔮")
 st.title("🔮 Hoş geldin, Mustafa")
 st.subheader("Evren bugün senin için ne fısıldıyor?")
 
-# ANAHTARI ÇAĞIRMA (İsim tam olarak bu olmalı)
-if "OPENAI_API_KEY" in st.secrets:
-    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+# Gemini Anahtarını Çek
+if "GEMINI_API_KEY" in st.secrets:
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    model = genai.GenerativeModel('gemini-pro')
 else:
-    st.error("Hata: Secrets kısmında 'OPENAI_API_KEY' bulunamadı.")
+    st.error("Hata: Secrets kısmında 'GEMINI_API_KEY' bulunamadı.")
     st.stop()
 
-user_input = st.text_area("Şu an ne hissediyorsun?", placeholder="Kalbindekileri dök...")
+user_input = st.text_area("Kalbindekileri dök...", placeholder="Buraya yaz...")
 
 if st.button("Mistik Mesajı Al"):
     if user_input:
         try:
-            # AI Yanıtı
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "Sen mistik bir falcısın. Mustafa'ya kısa ve anlamlı bir mesaj ver."},
-                    {"role": "user", "content": user_input}
-                ]
-            )
-            st.success(response.choices[0].message.content)
+            # Ücretsiz Gemini Yanıtı
+            response = model.generate_content(f"Sen mistik bir falcısın. Mustafa'ya şu konuda kısa, bilgece ve moral verici bir mesaj yaz: {user_input}")
+            st.success(response.text)
         except Exception as e:
-            st.error(f"Eyvah! OpenAI bir hata verdi: {e}")
+            st.error(f"Bir sorun oluştu: {e}")
     else:
-        st.warning("Lütfen önce bir şeyler yaz.")
+        st.warning("Lütfen bir şeyler yaz.")
