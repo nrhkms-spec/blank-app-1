@@ -2,27 +2,30 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Anahtarı kasadan alıyoruz
+# Sayfa Ayarları
+st.set_page_config(page_title="Mistik Mesaj", page_icon="🔮")
+st.title("🔮 Hoş geldin, Mustafa")
+st.subheader("Evren bugün senin için ne fısıldıyor?")
+
+# Kasa Kontrolü
 if "GEMINI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-    model = genai.GenerativeModel('gemini-pro')
+    # YENİ MODEL İSMİ BURADA
+    model = genai.GenerativeModel('gemini-1.5-flash')
 else:
-    st.warning("Lütfen API anahtarını bağla.")
+    st.error("Lütfen Secrets kısmına GEMINI_API_KEY ekle.")
     st.stop()
 
-st.title("🔮 Mistik Falcı")
-st.write("Hoş geldin Mustafa! Bugün yıldızlar senin için ne söylüyor?")
+user_input = st.text_area("Kalbindekileri dök...", placeholder="Yanlızım...")
 
-user_input = st.text_input("Bir soru sor veya içinden geçeni yaz...")
-
-if st.button("Falıma Bak"):
+if st.button("Mistik Mesajı Al"):
     if user_input:
-        with st.spinner('Yıldızlarla konuşuyorum...'):
-            try:
-                response = model.generate_content(f"Mustafa'ya mistik ve bilgece bir fal bak: {user_input}")
-                st.balloons()
+        try:
+            with st.spinner('Yıldızlarla bağlantı kuruluyor...'):
+                response = model.generate_content(f"Sen mistik bir falcısın. Mustafa ' {user_input} ' diyor. Ona moral verecek, bilgece ve kısa bir cevap yaz.")
                 st.success(response.text)
-            except:
-                st.error("Bir bağlantı sorunu oldu, tekrar dene.")
+                st.balloons()
+        except Exception as e:
+            st.error(f"Bir hata oluştu: {e}")
     else:
-        st.info("Lütfen önce bir şeyler yaz.")
+        st.warning("Lütfen bir şeyler yaz.")
